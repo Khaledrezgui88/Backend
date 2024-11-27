@@ -78,6 +78,34 @@ const updateCommande = async (req, res) => {
     if (Object.keys(req.body).length === 0) {
         return handleError(res, null, "You must update least one attribute", 400); // base request
       }
+
+      let totalPrice = 0;
+
+      // Use Promise.all to ensure all asynchronous product retrieval operations are completed
+      const productPromises = req.body.products.map(async (item) => {
+        // Find the product by its productId
+        const product = await Product.findById(item.productId);
+        console.log("Product", product)
+  
+        if (product) {
+          // If the product is found, calculate the total price for this product (price * quantity)
+          return product.price * item.quantity;
+        }
+  
+        // If the product is not found, return 0 (you can handle this case differently if needed)
+        return 0;
+      });
+  
+      // Wait for all product price calculations to complete
+      const totalPriceProducts = await Promise.all(productPromises);
+  
+      // Sum up the total prices of all products to get the final total price
+      totalPrice = totalPriceProducts.reduce((acc, curr) => acc + curr, 0);
+  
+      // Set the totalPrice in the request body
+      req.body.totalPrice = totalPrice;
+  
+
     const commande = await Commande.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
@@ -99,11 +127,6 @@ const deleteCommande = async (req, res) => {
 
     if (!commande) {
       return handleError(res, null, "No commande found", 404);
-    }
-
-    if (commande.status !== "Cancelled") {
-        return handleError(res, null, "Can not deleted this order", 409);
-
     }
 
     return res.status(200).json({ payload: "Commande deleted" });

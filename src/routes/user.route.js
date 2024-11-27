@@ -8,11 +8,11 @@ import isAdmin from '../middlewares/permission/isAdmin.js';
 const router = express.Router();
 
 // Define routes
-router.post('/', isAuth, isAdmin, userControllers.createUser);
-router.get('/:id', isAuth, userControllers.getOneUser);
-router.get('/', isAuth, isAdmin, userControllers.getAllUser);
-router.put('/:id', isAuth, userControllers.updateUser);
-router.delete('/:id', isAuth, isAdmin, userControllers.deleteUser);
+router.post('/', userControllers.createUser);
+router.get('/:id', userControllers.getOneUser);
+router.get('/', userControllers.getAllUser);
+router.put('/:id', userControllers.updateUser);
+router.delete('/:id', userControllers.deleteUser);
 
 
 export default router;
